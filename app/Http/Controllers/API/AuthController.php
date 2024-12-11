@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Melihovv\Base64ImageDecoder\Base64ImageDecoder;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -61,9 +62,47 @@ class AuthController extends Controller
                 'card_number' => $this->generateCardNumber(16),
             ]);
             DB::commit();
+            $token = JWTAuth::attempt(['email' => $request->email, 'password' => $request->password]);
+
+            $res = getUser($request->email);
+            $res->token = $token;
+            $res->token_expires_in = 60 * 60;
+            $res->token_type = 'bearer';
+
+            return response()->json($res);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json(['message' => $th->getMessage()], 500);
+        }
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only(['email', 'password']);
+
+        $validator = Validator::make($credentials, [
+            'email' =>'required|string|email',
+            'password' => 'required|string',
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(['error' => $validator->messages()],400);
+        }
+
+        try {
+            $token = JWTAuth::attempt($credentials);
+            if (!$token) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $res = getUser($request->email);
+            $res->token = $token;
+            $res->token_expires_in = 60 * 60;
+            $res->token_type = 'bearer';
+
+            return response()->json($res);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $th) {
+            return response()->json(['message' => $th->getMessage()],500);
         }
     }
 
