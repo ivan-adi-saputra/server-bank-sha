@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\TopUpController;
+use App\Http\Controllers\API\TransferController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Http\Request;
@@ -18,4 +19,5 @@ Route::post('/webhooks', [WebhookController::class, 'update']);
 
 Route::group(['middleware' => 'jwt.verify'], function ($router) {
     Route::post('top_ups', [TopUpController::class, 'store']);
+    Route::post('transfers', [TransferController::class, 'store']);
 });
