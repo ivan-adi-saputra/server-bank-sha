@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
 
 function getUser($param) {
     $user = User::where('id', $param)
@@ -17,4 +18,19 @@ function getUser($param) {
     $user->pin = $wallet->pin;
 
     return $user;
+}
+
+function pinChecker($pin) {
+    $userID = Auth::user()->id;
+    $wallet = Wallet::where('user_id', $userID)->first();
+
+    if(!$wallet) {
+        return false;
+    }
+
+    if ($wallet->pin == $pin) {
+        return true;
+    }
+
+    return false;
 }
