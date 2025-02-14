@@ -32,7 +32,7 @@ Route::group(['middleware' => 'jwt.verify'], function ($router) {
     Route::get('transfer_histories', [TransferHistoryController::class, 'index']);
     Route::get('transactions', [TransactionController::class, 'index']);
 
-    Route::group(function () {
+    Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'show']);
         Route::get('/{username}', [UserController::class, 'getUserByUsername']);
         Route::put('/', [UserController::class, 'update']);
