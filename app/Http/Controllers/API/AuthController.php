@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -15,7 +16,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request) 
+    public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -23,7 +24,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
             'pin' => 'required|digits:6',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->messages()], 400);
         }
@@ -81,12 +82,12 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
 
         $validator = Validator::make($credentials, [
-            'email' =>'required|string|email',
+            'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        if($validator->fails()) {
-            return response()->json(['error' => $validator->messages()],400);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 400);
         }
 
         try {
@@ -102,21 +103,21 @@ class AuthController extends Controller
 
             return response()->json($res);
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $th) {
-            return response()->json(['message' => $th->getMessage()],500);
+            return response()->json(['message' => $th->getMessage()], 500);
         }
     }
 
-    private function generateCardNumber($length) 
+    private function generateCardNumber($length)
     {
         $result = '';
-        
-        for ($i=0; $i < $length; $i++) { 
-            $result .= mt_rand(0,9);
+
+        for ($i = 0; $i < $length; $i++) {
+            $result .= mt_rand(0, 9);
         }
 
         $cardNumber = Wallet::where('card_number', $result)->exists();
 
-        if($cardNumber) {
+        if ($cardNumber) {
             return $this->generateCardNumber($length);
         }
 
@@ -129,9 +130,16 @@ class AuthController extends Controller
 
         $decodedContent = $decoder->getDecodedContent();
         $format = $decoder->getFormat();
-        $image = Str::random(10). '.' . $format;
+        $image = Str::random(10) . '.' . $format;
         Storage::disk('public')->put($image, $decodedContent);
 
         return $image;
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+
+        return response()->json(['message' => 'Log out success']);
     }
 }

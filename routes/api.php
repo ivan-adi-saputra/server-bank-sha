@@ -8,6 +8,7 @@ use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
 use App\Http\Controllers\API\TransferHistoryController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\WalletController;
 use App\Http\Controllers\API\WebhookController;
 use App\Http\Middleware\JwtMiddleware;
 use App\Models\OperatorCard;
@@ -37,4 +38,11 @@ Route::group(['middleware' => 'jwt.verify'], function ($router) {
         Route::get('/{username}', [UserController::class, 'getUserByUsername']);
         Route::put('/', [UserController::class, 'update']);
     });
+
+    Route::prefix('wallets')->group(function () {
+        Route::put('wallets', [WalletController::class, 'update']);
+        Route::get('wallets', [WalletController::class, 'show']);
+    });
+
+    Route::post('logout', [AuthController::class, 'logout']);
 });
