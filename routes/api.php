@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\DataPlanController;
 use App\Http\Controllers\API\PaymentMethodController;
+use App\Http\Controllers\API\TipController;
 use App\Http\Controllers\API\TopUpController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\TransferController;
@@ -45,4 +46,6 @@ Route::group(['middleware' => 'jwt.verify'], function ($router) {
     });
 
     Route::post('logout', [AuthController::class, 'logout']);
+
+    Route::get('tips', [TipController::class, 'index']);
 });
